@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PairUp — fair mentor matching</title>
+<meta name="description" content="Paste your mentees' and mentors' ranked choices and get a stable, explainable pairing in one click. No login, nothing leaves your browser.">
+<style>
+:root { --bg:#fbfaf7; --fg:#1d1d1f; --muted:#5f6368; --line:#d9d6cf; --card:#fff; --accent:#1f6f5c; --accent-fg:#fff; --warn:#8a5a00; --warn-bg:#fff6e0; }
+@media (prefers-color-scheme: dark) { :root { --bg:#16181a; --fg:#ececec; --muted:#a3a7ab; --line:#33373b; --card:#1f2225; --accent:#5fc3a6; --accent-fg:#0d1a16; --warn:#f0c46a; --warn-bg:#2d2615; } }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width: 960px; margin: 0 auto; padding: 24px 16px 64px; }
+h1 { font-size: 1.9rem; margin: 0 0 4px; }
+.lead { color: var(--muted); margin: 0 0 24px; max-width: 46em; }
+.grid { display:grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+label { font-weight: 600; display:block; margin-bottom: 4px; }
+.hint { color: var(--muted); font-size: .9rem; margin: 0 0 6px; }
+textarea { width:100%; min-height: 220px; padding: 10px; border:1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--fg); font: 14px/1.5 ui-monospace, Menlo, monospace; }
+.actions { display:flex; gap: 10px; flex-wrap: wrap; margin: 16px 0 8px; }
+button { font: inherit; padding: 10px 18px; border-radius: 8px; border:1px solid var(--line); background: var(--card); color: var(--fg); cursor: pointer; }
+button.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; }
+.summary { display:flex; gap: 12px; flex-wrap: wrap; margin: 20px 0 12px; }
+.stat { background: var(--card); border:1px solid var(--line); border-radius: 8px; padding: 8px 14px; }
+.stat b { font-size: 1.4rem; display:block; }
+.warn { background: var(--warn-bg); color: var(--warn); border-radius: 8px; padding: 10px 14px; margin: 12px 0; }
+.warn ul { margin: 4px 0 0; padding-left: 20px; }
+.mentor { background: var(--card); border:1px solid var(--line); border-radius: 8px; padding: 12px 14px; margin: 10px 0; }
+.mentor h3 { margin: 0 0 6px; font-size: 1.05rem; }
+.mentor ul { margin: 0; padding-left: 20px; }
+.why { color: var(--muted); font-size: .9rem; }
+.open { color: var(--muted); font-size: .9rem; }
+footer { margin-top: 40px; color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>PairUp</h1>
+  <p class="lead">Running a mentoring program? Paste who each mentee wants, in order, and how many mentees each mentor can take. PairUp makes a fair pairing where no mentee and mentor would both rather be with each other — and tells each person why they got who they got. Nothing leaves your browser.</p>
+  <div class="grid">
+    <div>
+      <label for="mentees">Mentees</label>
+      <p class="hint">One per line: <code>Name: 1st choice, 2nd choice, …</code> — or paste rows from a spreadsheet.</p>
+      <textarea id="mentees" spellcheck="false"></textarea>
+    </div>
+    <div>
+      <label for="mentors">Mentors</label>
+      <p class="hint">One per line: <code>Name (2)</code> = takes 2 mentees. Optional ranking: <code>Name (2): favourite mentee, …</code></p>
+      <textarea id="mentors" spellcheck="false"></textarea>
+    </div>
+  </div>
+  <div class="actions">
+    <button class="primary" id="go">Make pairs</button>
+    <button id="example">Fill with an example</button>
+    <button id="copy" hidden>Copy as CSV</button>
+  </div>
+  <div id="out" aria-live="polite"></div>
+  <footer>PairUp uses the deferred-acceptance (Gale–Shapley) method, mentee-proposing. Open source under the MIT License.</footer>
+</main>
+<script type="module" src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+---
+doc: prd
+status: approved
+---
+
+# PairUp — Product Requirements
+
+## The Core Journey
+
+1. A coordinator opens the page (no sign-in).
+2. They paste mentees as `Name: 1st choice, 2nd choice, …` or as spreadsheet rows.
+3. They paste mentors as `Name (capacity)`, optionally followed by `: ranked mentees`.
+4. They press **Make pairs**.
+5. They see a summary (paired / got 1st choice / not paired), each mentor's mentees with "their Nth choice" and, when relevant, which higher choices were already full, open seats, and a "Not paired" list with reasons.
+6. They press **Copy as CSV** and paste into their spreadsheet.
+
+## Screens and Layout
+
+A single page: title and one-paragraph explanation; two text areas side by side (stacked under 700px); buttons (Make pairs, Fill with an example, Copy as CSV after a result); results below.
+
+## Look and Feel
+
+Calm and plain, like a well-made utility: warm off-white background, one green accent, system fonts, monospace for the input areas. Follows the system dark mode.
+
+## Features and Behavior
+
+- **Parsing**: `:` separates name from choices; without `:`, tabs or commas do. Choices may be separated by `,` `;` tab or `>`. A first line that is a header ("Name", "Mentee", "Mentor name"…) is skipped. Blank lines and `#` lines are skipped. Names match ignoring case, extra spaces and full-width/half-width differences.
+- **Capacity**: `(2)` or `x2` after a mentor name; default 1.
+- **Matching**: mentee-proposing deferred acceptance. When a mentor gave no ranking, they prefer mentees who ranked them higher, then whoever appears first in the list.
+- **Warnings**: duplicate names (first kept), choices that are not on the other list (skipped) — shown in a "Check these lines" box.
+- Editing either list clears the old result.
+
+## States and Boundaries
+
+- Empty lists → "Add at least one mentee and one mentor first."
+- A mentee with no valid choices → listed under Not paired, "listed no mentor from the mentor list".
+- More mentees than seats → the rest are Not paired with the mentors that were full.
+
+## Product Decisions
+
+- Mentee-proposing, because it is the best stable result for mentees (the side that asks).
+- Explanations name only facts the algorithm used ("Priya was already full"), never guesses.
+- Nothing is sent to a server: names of real participants stay on the coordinator's computer.
+
+## What We're Building
+
+The page, the matching module, and a test script.
+
+## Deferred From the POC
+
+Mentors-propose mode, showing ties, Japanese UI, importing a CSV file.
+
+## Possible Later Enhancements
+
+Minimum-one-mentee-per-mentor constraint; group mentoring (several mentees per session).
+
+## Non-Goals
+
+Scheduling meetings, messaging participants, storing programs.
+
+## Open Questions
+
+Do coordinators want mentor preferences to weigh more than mentee preferences? (Collect feedback after launch.)

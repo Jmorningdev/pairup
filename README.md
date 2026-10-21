@@ -1,6 +1,6 @@
 # PairUp
 
-Stable mentor–mentee matching from ranked choices, on one page. Paste your mentees' ranked mentor choices and each mentor's capacity; PairUp returns a **stable** pairing (no mentee and mentor would both rather be with each other) and tells every mentee why they got their match, or why they weren't paired.
+Stable mentor–mentee matching from ranked choices, on one page. Paste your mentees' ranked mentor choices and each mentor's capacity; PairUp returns a **stable** pairing (no mentee and mentor would both rather be paired with each other than with who they got) and tells every mentee why they got their match, or why they weren't paired.
 
 **Live:** https://pairup.waitlab.workers.dev — nothing you paste leaves your browser.
 

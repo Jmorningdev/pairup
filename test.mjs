@@ -19,11 +19,11 @@ const run = (a, b) => { const e = parseList(a, false), m = parseList(b, true); r
   const { e, m, r } = run(
     'Name\tChoice 1\tChoice 2\nana  lopez\tKENJI\tNobody\nBo\tkenji\nBo\tLee',
     'Mentor name\nKenji');
-  assert.deepEqual(e.people.map(p => p.name), ['ana  lopez', 'Bo']);
+  assert.deepEqual(e.people.map(p => p.name), ['ana lopez', 'Bo']);
   assert.equal(e.warnings.length, 1);
   assert.ok(r.warnings.some(w => w.includes('Nobody')));
   assert.equal(r.pairs.length, 1);
-  assert.equal(r.pairs[0].mentee, 'ana  lopez'); // tie on mentor side -> earlier line
+  assert.equal(r.pairs[0].mentee, 'ana lopez'); // tie on mentor side -> earlier line
   assert.equal(r.unmatched[0].mentee, 'Bo');
   assert.deepEqual(r.unmatched[0].passedOver, ['Kenji']);
 }
@@ -32,7 +32,7 @@ const run = (a, b) => { const e = parseList(a, false), m = parseList(b, true); r
   const { r } = run('A: X, Y\nB: Y, X', 'X\nY');
   assert.deepEqual(r.pairs.map(p => p.choice), [1, 1]);
 }
-// 5. Spreadsheet exports: timestamp column, capacity column, digits in names.
+// 4. Spreadsheet exports: timestamp column, capacity column, digits in names.
 {
   const { e, m, r } = run(
     'Timestamp\tYour name\tFirst choice\tSecond choice\n10/21/2026 9:14:02\tAna Lopez\tPriya\tAlex 2\n10/21/2026 9:20:11\tBo\tAlex 2',
@@ -45,7 +45,19 @@ const run = (a, b) => { const e = parseList(a, false), m = parseList(b, true); r
   // Header-less export rows that start with a date.
   assert.deepEqual(parseList('10/21/2026 9:14:02\tAna\tPriya', false).people.map(p => p.name), ['Ana']);
 }
-// 4. Random instances: never a blocking pair, never over capacity, nobody twice.
+// 5. Header names people really use, form CSV exports, capacities written as text.
+{
+  const names = s => parseList(s, false).people.map(p => [p.name, p.prefs]);
+  assert.deepEqual(names('Name\tMentor 1\tMentor 2\nAna\tPriya\tTom'), [['Ana', ['Priya', 'Tom']]]);
+  assert.deepEqual(names('Your name\tPreferred mentor\tBackup mentor\nAna\tPriya\tTom'), [['Ana', ['Priya', 'Tom']]]);
+  assert.deepEqual(names('Timestamp,Email,Your name,First choice,Second choice\n2026/10/21 9:14:02 AM GMT+9,a@x.org,"Lopez, Ana",Priya,Tom'), [['Lopez, Ana', ['Priya', 'Tom']]]);
+  assert.deepEqual(names('Ana > Priya > Tom\nBo: Priya\tTom'), [['Ana', ['Priya', 'Tom']], ['Bo', ['Priya', 'Tom']]]);
+  const m = parseList('Mentor\tCapacity\nPriya\t2 mentees\nTom\ttwo', true);
+  assert.deepEqual(m.people.map(p => [p.name, p.capacity]), [['Priya', 2], ['Tom', 1]]);
+  assert.equal(m.warnings.length, 1);
+  assert.deepEqual(parseList('Mentor Kim (1)\nLee\t3 seats', true).people.map(p => [p.name, p.capacity]), [['Mentor Kim', 1], ['Lee', 3]]);
+}
+// 6. Random instances: never a blocking pair, never over capacity, nobody twice.
 {
   let seed = 7; const rnd = n => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed % n; };
   for (let t = 0; t < 300; t++) {

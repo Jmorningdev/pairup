@@ -11,7 +11,7 @@ Each mentee "asks" their top remaining mentor. A mentor holds on to the best ask
 
 ## The Core Journey Through the System
 
-`index.html` → `app.js` reads both text areas → `parseList()` turns lines into people → `match()` runs deferred acceptance and records who turned each mentee away → `app.js` renders summary, mentor cards (seats filled), warnings, reasons and CSV (with a reason column).
+`index.html` → `app.js` reads both text areas → `parseList()` turns lines into people → `match()` runs deferred acceptance and records who turned each mentee away → `app.js` renders summary, mentor cards (seats filled), warnings, reasons and CSV (with a reason column; mentors with no mentees appear only on the page).
 
 ## Stack
 
@@ -31,14 +31,14 @@ CSS custom properties on `:root`, redefined under `prefers-color-scheme: dark`. 
 ## Components
 
 ### `public/match.js`
-`parseList(text, withCapacity)` → `{ people, warnings }`; `match(mentees, mentors)` → `{ pairs, unmatched, openSeats, warnings }`; `blockingPairs()` for tests.
+`parseList(text, withCapacity)` → `{ people, warnings }`; `match(mentees, mentors)` → `{ pairs, unmatched, openSeats, warnings }` (the page shows seats per mentor itself); `blockingPairs()` for tests.
 
 ### `public/app.js`
 DOM wiring: example data, rendering, HTML escaping, CSV copy.
 
 ## Data Model
 
-Person: `{ name, prefs: string[], capacity }`. Pair: `{ mentee, mentor, choice, passedOver: string[] }`. Unmatched: `{ mentee, passedOver, noChoices }`. Nothing is persisted.
+Person: `{ name, prefs: string[], capacity }`. Pair: `{ mentee, mentor, choice, passedOver: string[] }`. Unmatched: `{ mentee, passedOver, noChoices, listedNone }`. Nothing is persisted.
 
 ## File Structure
 
@@ -58,10 +58,11 @@ Cloudflare Workers (free plan) for hosting only. No APIs, no analytics, no cooki
 ## Important Failure Modes
 
 - Names spelled differently between lists → shown as warnings so the coordinator can fix them.
-- Size: built for programs of 10–200 people, which pair instantly (200 × 30 in well under 0.1 s). A stress case of 3,000 mentees each ranking all 300 mentors took about 2.5 s in Node; the page is unresponsive while it runs.
+- Size: built for programs of 10–200 people, which pair instantly (200 × 30 in well under 0.1 s). A stress case of 3,000 mentees each ranking all 300 mentors took about 2.5 s in Node 20 on an Apple-silicon laptop (random preferences, timed around `match()`); the page is unresponsive while it runs.
 - Clipboard blocked by the browser → the CSV button fails silently (acceptable for the POC).
 - CSV cells starting with `=`, `+`, `-` or `@` are prefixed with `'` so spreadsheet apps don't run them as formulas.
-- Comma-separated rows with a comma inside a name ("Lopez, Ana") are misread; tab-separated rows and the `Name: choices` form are not affected.
+- An unquoted comma inside a name in comma-separated rows splits the name; quoted cells and tab-separated rows are fine.
+- Tests check stability against explicit rankings only; the tie rule for mentors who gave no ranking is deterministic but not separately tested.
 
 ## What Was Simplified and Why
 

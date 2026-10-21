@@ -1,6 +1,6 @@
 # PairUp
 
-Fair mentor–mentee matching from ranked choices, on one page. Paste your mentees' ranked mentor choices and each mentor's capacity; PairUp returns a **stable** pairing (no mentee and mentor would both rather be with each other) and tells every person why they got their result.
+Stable mentor–mentee matching from ranked choices, on one page. Paste your mentees' ranked mentor choices and each mentor's capacity; PairUp returns a **stable** pairing (no mentee and mentor would both rather be with each other) and tells every mentee why they got their match, or why they weren't paired.
 
 **Live:** https://pairup.waitlab.workers.dev — nothing you paste leaves your browser.
 
@@ -15,7 +15,7 @@ Ben: Priya, Tom                Priya (2): Emma, Chloe, Ben, Aisha
 Gina: Marco, Priya             Tom (2)
 ```
 
-Rows copied from a spreadsheet (name column, then choice columns, optional header row) work too. Mentor rankings are optional.
+Rows copied from a spreadsheet or a form's CSV export work too: a header row marks the name column, choice columns, timestamp/e-mail columns (ignored) and a capacity column. Mentor rankings are optional.
 
 ## Run
 

@@ -11,7 +11,7 @@ status: approved
 2. They paste mentees as `Name: 1st choice, 2nd choice, …` or as spreadsheet rows.
 3. They paste mentors as `Name (capacity)`, optionally followed by `: ranked mentees`.
 4. They press **Make pairs**.
-5. They see a summary (paired / got 1st choice / not paired), each mentor's mentees with "their Nth choice" and, when relevant, which higher choices were already full, open seats, and a "Not paired" list with reasons.
+5. They see a summary (paired / got 1st choice / not paired), each mentor's card with "N of M seats filled" and their mentees with "their Nth choice" plus, when relevant, which higher choices filled up with mentees ahead of them (or had no seats), and a "Not paired" list with reasons.
 6. They press **Copy as CSV** and paste into their spreadsheet.
 
 ## Screens and Layout
@@ -24,10 +24,10 @@ Calm and plain, like a well-made utility: warm off-white background, one green a
 
 ## Features and Behavior
 
-- **Parsing**: `:` separates name from choices; without `:`, tabs or commas do. Choices may be separated by `,` `;` tab or `>`. A first line that is a header ("Name", "Mentee", "Mentor name"…) is skipped. Blank lines and `#` lines are skipped. Names match ignoring capitalization and extra spaces. Rows copied from a spreadsheet are tab-separated: a header row (if any) marks timestamp, e-mail and capacity columns, which are not read as choices.
-- **Capacity**: `(2)` after a mentor name, a capacity column, or a number cell in a mentor's row; default 1.
+- **Parsing**: `Name: choices` lines, where choices are separated by `,` `;` `>` or tabs; or rows separated by tabs or commas (double-quoted cells may contain commas). A header row on the first line is read for column roles: a column with "name" is the name, timestamp/e-mail/date columns are ignored, a capacity/seats column is the capacity, every other column is a choice. Rows that start with a date (form exports without a header) drop that first cell. Blank lines and `#` lines are skipped. Names match ignoring capitalization and extra spaces. Rows copied from a spreadsheet are tab-separated: a header row (if any) marks timestamp, e-mail and capacity columns, which are not read as choices.
+- **Capacity**: `(2)` after a mentor name, a capacity column, or a cell like `2`, `2 mentees` or `2 seats` in a mentor's row; default 1. A capacity that isn't a number ("two") is flagged and treated as 1. A capacity of 0 means "no seats".
 - **Matching**: mentee-proposing deferred acceptance. When a mentor gave no ranking, they prefer mentees who ranked them higher, then whoever appears first in the list.
-- **Warnings**: duplicate names (first kept), choices that are not on the other list (skipped) — shown in a "Check these lines" box.
+- **Warnings**: duplicate names (first kept), choices that are not on the other list (skipped), capacities that aren't numbers — shown in a "Check these lines" box.
 - Editing either list clears the old result.
 
 ## States and Boundaries

@@ -2,42 +2,69 @@
 // (Gale–Shapley with mentor capacities). No DOM here so it runs in Node tests too.
 
 const key = s => s.normalize('NFKC').trim().replace(/\s+/g, ' ').toLowerCase();
-const HEADER = /\b(name|mentee|mentor|choice|preference|timestamp|capacity|seats|e-?mail)\b/i;
-const SKIP = /timestamp|e-?mail|date|time/i, CAP = /capacity|seats|how many|max/i;
+const HEADER_CELL = /\b(name|mentee|mentor|choice|preference|preferred|timestamp|capacity|seats|e-?mail)\b/i;
+const HEADER_LINE = /^(your |mentee |mentor )?names?$|^mentees?$|^mentors?$/i;
+const SKIP = /timestamp|e-?mail|\bdate\b|\btime\b/i, CAP = /capacity|seats|how many|\bmax\b/i;
 const STAMP = /^\d{1,4}[\/.\-]\d{1,2}[\/.\-]\d{1,4}\b/;
+const tidy = s => s.trim().replace(/\s+/g, ' ');
 
-// One person per line. "Name: choice 1, choice 2" or rows copied from a spreadsheet
-// (tab-separated: name, then choices; an optional header row tells which columns are timestamps,
-// e-mails or capacity). Mentors may carry a capacity: "Name (2)" or a capacity column.
-// Blank lines and "#" lines are skipped.
+// Split one CSV/TSV row; double quotes may wrap a cell that contains the separator.
+function cellsOf(line, sep) {
+  const out = []; let cur = '', q = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (q) { if (c === '"' && line[i + 1] === '"') { cur += '"'; i++; } else if (c === '"') q = false; else cur += c; }
+    else if (c === '"' && !cur.trim()) q = true;
+    else if (c === sep) { out.push(cur); cur = ''; }
+    else cur += c;
+  }
+  out.push(cur);
+  return out.map(tidy);
+}
+
+// One person per line: "Name: choice 1, choice 2", or rows copied from a spreadsheet or a form
+// export (tab- or comma-separated: name, then choices). A header row tells which columns hold the
+// name, timestamps/e-mails (ignored) and capacity. Mentors may carry a capacity: "Name (2)" or a
+// capacity column. Blank lines and "#" lines are skipped.
 export function parseList(text, withCapacity) {
   const people = [], warnings = [], seen = new Map();
-  let cols = null; // column roles from a header row
+  let cols = null, sep = null; // column roles and separator from a header row
   text.split(/\r?\n/).forEach((raw, i) => {
     const line = raw.trim();
     if (!line || line.startsWith('#')) return;
-    let cells;
-    if (line.includes('\t')) cells = raw.split('\t').map(s => s.trim());
-    else if (line.includes(':')) { const c = line.indexOf(':'); cells = [line.slice(0, c), ...line.slice(c + 1).split(/[,;>]/)]; }
-    else cells = line.split(/[,;]/);
-    cells = cells.map(s => s.trim());
-    const isHeader = cells.length > 1 ? HEADER.test(cells[0]) || cells.some(c => /timestamp/i.test(c)) : HEADER.test(cells[0]) && cells[0].split(' ').length <= 3;
-    if (!people.length && !cols && isHeader) {
-      const roles = cells.map(c => (CAP.test(c) ? 'cap' : SKIP.test(c) ? 'skip' : /name|mentee|mentor/i.test(c) && !/choice|pref/i.test(c) ? 'name' : 'choice'));
-      if (!roles.includes('name')) roles[roles.indexOf('choice')] = 'name';
-      cols = roles;
-      return;
+    const where = `${withCapacity ? 'Mentor' : 'Mentee'} list, line ${i + 1}`;
+    if (!people.length && !cols) {
+      const s = line.includes('\t') ? '\t' : line.includes(',') && !line.includes(':') || /timestamp/i.test(line) ? ',' : null;
+      const head = s ? cellsOf(line, s) : [tidy(line)];
+      if (s ? head.length > 1 && HEADER_CELL.test(head[0]) || head.some(c => /timestamp/i.test(c)) : HEADER_LINE.test(head[0])) {
+        if (s) {
+          cols = head.map(c => (CAP.test(c) ? 'cap' : SKIP.test(c) ? 'skip' : /name/i.test(c) ? 'name' : 'choice'));
+          const n = cols.indexOf('name');
+          if (n < 0) cols[cols.indexOf('choice')] = 'name';
+          else cols = cols.map((r, j) => (r === 'name' && j !== n ? 'choice' : r));
+          sep = s;
+        }
+        return;
+      }
     }
-    const tabbed = line.includes('\t');
-    let roles = (tabbed && cols) || cells.map((c, j) => (j === 0 ? 'name' : 'choice'));
-    if (!(tabbed && cols) && STAMP.test(cells[0]) && cells.length > 1) roles = ['skip', 'name', ...cells.slice(2).map(() => 'choice')];
+    let cells, roles;
+    if (cols && line.includes(sep)) { cells = cellsOf(line, sep); roles = cols; }
+    else if (STAMP.test(line) && /[\t,]/.test(line)) { cells = cellsOf(line, line.includes('\t') ? '\t' : ',').slice(1); }
+    else if (line.includes(':')) { const c = line.indexOf(':'); cells = [tidy(line.slice(0, c)), ...line.slice(c + 1).split(/[,;>\t]/).map(tidy)]; }
+    else cells = line.split(/[\t,;>]/).map(tidy);
+    roles ??= cells.map((c, j) => (j === 0 ? 'name' : 'choice'));
     let name = '', capacity = 1, capSet = false;
     const prefs = [], got = new Set();
     cells.forEach((c, j) => {
       const r = roles[j] ?? 'choice';
       if (!c || r === 'skip') return;
       if (r === 'name') { if (!name) name = c; return; }
-      if (withCapacity && (r === 'cap' || /^\d+$/.test(c)) && !capSet) { capacity = Number(c) || 0; capSet = true; return; }
+      if (withCapacity && !capSet && (r === 'cap' || /^\d+\s*(mentees?|seats?|people)?$/i.test(c))) {
+        capSet = true;
+        if (/^\d+/.test(c)) capacity = parseInt(c, 10);
+        else warnings.push(`${where}: capacity "${c}" is not a number — used 1.`);
+        return;
+      }
       if (r === 'cap') return;
       if (!got.has(key(c))) { got.add(key(c)); prefs.push(c); }
     });
@@ -46,7 +73,7 @@ export function parseList(text, withCapacity) {
       if (m) { capacity = Number(m[1]); name = name.slice(0, m.index).trim(); }
     }
     if (!name) return;
-    if (seen.has(key(name))) { warnings.push(`Line ${i + 1}: "${name}" appears twice — kept the first line.`); return; }
+    if (seen.has(key(name))) { warnings.push(`${where}: "${name}" appears twice — kept the first line.`); return; }
     const person = { name, prefs, capacity };
     seen.set(key(name), person);
     people.push(person);
@@ -64,7 +91,7 @@ export function match(mentees, mentors) {
     const list = [];
     for (const p of e.prefs) {
       const m = byKey.get(key(p));
-      if (m) list.push(m); else warnings.push(`${e.name} listed "${p}", who is not on the mentor list — skipped.`);
+      if (m) list.push(m); else warnings.push(`Mentee ${e.name} chose "${p}", who is not on the mentor list — skipped.`);
     }
     choices.set(e, list);
   }

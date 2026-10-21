@@ -4,6 +4,19 @@ Fair mentor–mentee matching from ranked choices, on one page. Paste your mente
 
 **Live:** https://pairup.waitlab.workers.dev — nothing you paste leaves your browser.
 
+![PairUp pairing seven mentees with three mentors, with a reason for each result](docs/screenshot.png)
+
+## Input
+
+```
+Mentees                        Mentors
+Aisha: Priya, Marco, Tom       Marco (2): Diego, Aisha
+Ben: Priya, Tom                Priya (2): Emma, Chloe, Ben, Aisha
+Gina: Marco, Priya             Tom (2)
+```
+
+Rows copied from a spreadsheet (name column, then choice columns, optional header row) work too. Mentor rankings are optional.
+
 ## Run
 
 ```sh
@@ -22,7 +35,7 @@ Made with the Devpost *Build With AI: Basics* Skill Pack: [scope](devpost/scope.
 
 ## How this was built
 
-Built with an AI coding agent (Claude Code), which wrote the code and docs; the human entrant chose to enter and reviews the submission.
+An AI coding agent (Claude Code) chose the idea, wrote the code, tests and planning docs, and deployed the page, working unattended. The entrant asked for a small, useful entry to this hackathon and decides whether and how to submit it.
 
 ## License
 

@@ -19,7 +19,7 @@ Paste mentees → paste mentors → press **Make pairs** → read who goes with 
 
 ## Inspiration & Identity
 
-Hand-pairing invites "why did they get their first choice and I didn't?" questions. The deferred-acceptance algorithm (Gale–Shapley) answers that question mathematically, but the tools that use it are paid platforms or code. PairUp puts it on one free page with no login.
+Hand-pairing invites "why did they get their first choice and I didn't?" questions. The deferred-acceptance algorithm (Gale–Shapley) answers that question mathematically, but the tools we found that use it are paid mentoring platforms or code libraries. PairUp puts it on one free page with no login.
 
 ## Why This Matters to the Learner
 
@@ -29,7 +29,8 @@ A proof that a well-known, explainable algorithm can replace a spreadsheet after
 
 - The example fills, and **Make pairs** shows paired mentees, open seats, and unpaired mentees with reasons.
 - No mentor is over capacity; no blocking pair exists (checked by `node test.mjs` on 300 random cases).
-- Rows pasted from a spreadsheet (tabs, header row, different capitalization) are read correctly; unknown names are flagged, not silently dropped.
+- Rows copied from a spreadsheet (tab-separated: name column, choice columns, optional header row, timestamp and capacity columns) are read correctly; names match regardless of capitalization and spacing; unknown names are flagged, not silently dropped.
+- Known limit: comma-separated rows whose names contain a comma ("Lopez, Ana") are misread — use tab-separated rows or the `Name: choices` form.
 
 ## The POC Boundary
 
@@ -37,7 +38,7 @@ One static page, English only, everything computed in the browser. No accounts, 
 
 ## Later
 
-Mentor-side preference import from a second form column; ties shown explicitly; "mentors propose" mode; Japanese UI.
+Ties shown explicitly; a "mentors propose" mode; importing a CSV file directly.
 
 ## Explicitly Cut
 

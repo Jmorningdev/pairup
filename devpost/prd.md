@@ -24,8 +24,8 @@ Calm and plain, like a well-made utility: warm off-white background, one green a
 
 ## Features and Behavior
 
-- **Parsing**: `:` separates name from choices; without `:`, tabs or commas do. Choices may be separated by `,` `;` tab or `>`. A first line that is a header ("Name", "Mentee", "Mentor name"…) is skipped. Blank lines and `#` lines are skipped. Names match ignoring case, extra spaces and full-width/half-width differences.
-- **Capacity**: `(2)` or `x2` after a mentor name; default 1.
+- **Parsing**: `:` separates name from choices; without `:`, tabs or commas do. Choices may be separated by `,` `;` tab or `>`. A first line that is a header ("Name", "Mentee", "Mentor name"…) is skipped. Blank lines and `#` lines are skipped. Names match ignoring capitalization and extra spaces. Rows copied from a spreadsheet are tab-separated: a header row (if any) marks timestamp, e-mail and capacity columns, which are not read as choices.
+- **Capacity**: `(2)` after a mentor name, a capacity column, or a number cell in a mentor's row; default 1.
 - **Matching**: mentee-proposing deferred acceptance. When a mentor gave no ranking, they prefer mentees who ranked them higher, then whoever appears first in the list.
 - **Warnings**: duplicate names (first kept), choices that are not on the other list (skipped) — shown in a "Check these lines" box.
 - Editing either list clears the old result.
@@ -33,13 +33,13 @@ Calm and plain, like a well-made utility: warm off-white background, one green a
 ## States and Boundaries
 
 - Empty lists → "Add at least one mentee and one mentor first."
-- A mentee with no valid choices → listed under Not paired, "listed no mentor from the mentor list".
-- More mentees than seats → the rest are Not paired with the mentors that were full.
+- A mentee with no choices → Not paired, "listed no mentors"; with choices that match nobody → "none of their choices matches a name on the mentor list".
+- More mentees than seats → the rest are Not paired, naming the mentors that filled up.
 
 ## Product Decisions
 
 - Mentee-proposing, because it is the best stable result for mentees (the side that asks).
-- Explanations name only facts the algorithm used ("Priya was already full"), never guesses.
+- Explanations name only facts the algorithm used ("Priya filled up with mentees ahead of them"), and the page explains what "ahead" means, including the tie rule for mentors who gave no ranking.
 - Nothing is sent to a server: names of real participants stay on the coordinator's computer.
 
 ## What We're Building
@@ -48,7 +48,7 @@ The page, the matching module, and a test script.
 
 ## Deferred From the POC
 
-Mentors-propose mode, showing ties, Japanese UI, importing a CSV file.
+Mentors-propose mode, showing ties, importing a CSV file.
 
 ## Possible Later Enhancements
 

@@ -11,7 +11,7 @@ Each mentee "asks" their top remaining mentor. A mentor holds on to the best ask
 
 ## The Core Journey Through the System
 
-`index.html` → `app.js` reads both text areas → `parseList()` turns lines into people → `match()` runs deferred acceptance and records who turned each mentee away → `app.js` renders summary, mentor cards, warnings and CSV.
+`index.html` → `app.js` reads both text areas → `parseList()` turns lines into people → `match()` runs deferred acceptance and records who turned each mentee away → `app.js` renders summary, mentor cards (seats filled), warnings, reasons and CSV (with a reason column).
 
 ## Stack
 
@@ -58,12 +58,14 @@ Cloudflare Workers (free plan) for hosting only. No APIs, no analytics, no cooki
 ## Important Failure Modes
 
 - Names spelled differently between lists → shown as warnings so the coordinator can fix them.
-- Very large inputs: the algorithm is O(mentees × mentors) proposals; thousands of lines are fine in a browser.
+- Size: built for programs of 10–200 people, which pair instantly (200 × 30 in well under 0.1 s). A stress case of 3,000 mentees each ranking all 300 mentors took about 2.5 s in Node; the page is unresponsive while it runs.
 - Clipboard blocked by the browser → the CSV button fails silently (acceptable for the POC).
+- CSV cells starting with `=`, `+`, `-` or `@` are prefixed with `'` so spreadsheet apps don't run them as formulas.
+- Comma-separated rows with a comma inside a name ("Lopez, Ana") are misread; tab-separated rows and the `Name: choices` form are not affected.
 
 ## What Was Simplified and Why
 
-No mentor-proposing option and no tie display, to keep one clear result. English only, for the hackathon audience.
+No mentor-proposing option and no tie display, to keep one clear result. English only.
 
 ## Decisions and Open Issues
 
